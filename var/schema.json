@@ -1,34 +1,118 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/unsektor/mac-tag-list/refs/tags/0.1.1/var/schema.json",
+  "title": "File tags metadata",
+  "description": "A collection of files with associated tags",
   "type": "object",
   "properties": {
     "data": {
-      "type": "array",
-      "items": [
+      "$ref": "#/$defs/fileList"
+    }
+  },
+  "required": ["data"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "data": [
         {
-          "type": "object",
-          "properties": {
-            "path": {
-              "type": "string"
-            },
-            "tags": {
-              "type": "array",
-              "items": [
-                {
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "required": [
-            "path",
-            "tags"
-          ]
+          "path": "/documents/report.pdf",
+          "tags": ["important", "work", "q1"]
+        },
+        {
+          "path": "/images/photo.jpg",
+          "tags": ["personal", "vacation"]
         }
       ]
     }
-  },
-  "required": [
-    "data"
-  ]
+  ],
+  "$defs": {
+    "fileList": {
+      "title": "File list",
+      "description": "List of files with related metadata",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/fileItem"
+      },
+      "minItems": 0,
+      "uniqueItems": true,
+      "examples": [
+        [
+          {
+            "path": "/documents/report.pdf",
+            "tags": ["important", "work"]
+          },
+          {
+            "path": "/photos/image.png",
+            "tags": ["personal"]
+          }
+        ]
+      ]
+    },
+    "fileItem": {
+      "title": "File metadata",
+      "description": "Represents a single file with its path and associated tags",
+      "type": "object",
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/filePath"
+        },
+        "tags": {
+          "$ref": "#/$defs/tagList"
+        }
+      },
+      "required": ["path", "tags"],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "path": "/documents/report.pdf",
+          "tags": ["important", "work"]
+        }
+      ]
+    },
+    "filePath": {
+      "title": "File path",
+      "description": "Absolute or relative path to the file",
+      "type": "string",
+      "format": "uri-reference",
+      "pattern": "^[^\\0]+$",
+      "minLength": 1,
+      "examples": [
+        "/documents/report.pdf",
+        "./relative/path/image.jpg"
+      ]
+    },
+    "tagList": {
+      "title": "Tag list",
+      "description": "List of tags associated with the file",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/tag"
+      },
+      "minItems": 0,
+      "uniqueItems": true,
+      "examples": [
+        ["important", "work", "q1"],
+        ["personal", "vacation"],
+        ["archive"]
+      ]
+    },
+    "tag": {
+      "title": "Tag",
+      "description": "A single tag string for categorizing files",
+      "type": "string",
+      "pattern": "^[^\\0:/\\\\*?\"<>|][^\\0:/\\\\*?\"<>|]{0,30}$",
+      "minLength": 1,
+      "maxLength": 31,
+      "examples": [
+        "important",
+        "work",
+        "personal",
+        "archive",
+        "important",
+        "work documents",
+        "project-v1.0",
+        "backup 2024"
+      ]
+    }
+  }
 }
