@@ -1,8 +1,8 @@
 # Tag list
 
-Dead simple utility to extract mac-os file tags as json data.
+Dead simple utility to extract mac-os file tags as JSON data.
 
-## Build 
+## Build
 
 ```sh
 clang -framework Foundation src/tag-list/main.m -o /tmp/tag-list
@@ -48,3 +48,6 @@ Useful usage could be case with passing result of `find`
 ```sh
 find ~/Documents/ -type f -iname '*.txt' -print0 | xargs -0 tag-list
 ```
+
+## [Changelog](changelog.md)
+## [License (MIT)](license.md)
