@@ -1,8 +1,7 @@
 name: Build macOS Universal Binary
 
 on:
-    push:
-        tags: [ '*' ]
+    push: ~
     release:
         types: [published]
 
@@ -21,20 +20,20 @@ jobs:
                       deployment_target: "14.0"
                       identifier: "macos14"
 
-                    - runner: macos-13
-                      macos_version: "13"
-                      deployment_target: "13.0"
-                      identifier: "macos13"
+                    #- runner: macos-13
+                    #  macos_version: "13"
+                    #  deployment_target: "13.0"
+                    #  identifier: "macos13"
 
-                    - runner: macos-12
-                      macos_version: "12"
-                      deployment_target: "12.0"
-                      identifier: "macos12"
+                    #- runner: macos-12
+                    #  macos_version: "12"
+                    #  deployment_target: "12.0"
+                    #  identifier: "macos12"
 
-                    - runner: macos-11
-                      macos_version: "11"
-                      deployment_target: "11.0"
-                      identifier: "macos11"
+                    #- runner: macos-11
+                    #  macos_version: "11"
+                    #  deployment_target: "11.0"
+                    #  identifier: "macos11"
 
                     #- runner: self-hosted
                     #  macos_version: "10.15"
@@ -76,13 +75,13 @@ jobs:
                     -mmacosx-version-min=${{ matrix.deployment_target }} \
                     -arch x86_64 -arch arm64 \
                     -o ${{ env.PROJECT_NAME }}_${{ matrix.identifier }} \
-                    *.m
+                    src/tag-list/main.m
 
             - name: Get binary info
               run: |
                   file ${{ env.PROJECT_NAME }}_${{ matrix.identifier }}
                   lipo -info ${{ env.PROJECT_NAME }}_${{ matrix.identifier }}
-                  otool -l ${{ env.PROJECT_NAME }}_${{ matrix.identifier }} | grep -A 3 LC_VERSION_MIN_MACOSX
+                  otool -l ${{ env.PROJECT_NAME }}_${{ matrix.identifier }}
 
             - name: Upload artifact
               uses: actions/upload-artifact@v4
