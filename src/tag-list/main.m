@@ -22,7 +22,7 @@ int main(int argc, const char* argv[]) {
 
             fprintf(stderr, "Error: path `%s` not exists\n",
                     [path cStringUsingEncoding:NSUTF8StringEncoding]);
-            return 2;
+            // ... continue program
         }
 
         // Collect path tags

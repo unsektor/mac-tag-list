@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - code micro-optimizations performed
+- continue program if file is not exists (like `cp`)
 
 ## [0.1.1] - 2025-11-06
 ### Added
