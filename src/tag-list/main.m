@@ -26,7 +26,7 @@ int main(int argc, const char* argv[]) {
         }
 
         // Collect path tags
-        NSMutableArray* infoList = [NSMutableArray new];
+        NSMutableArray* pathMetadataList = [NSMutableArray new];
 
         NSEnumerator* pathSetEnumerator = [pathSet objectEnumerator];
         NSString* path;
@@ -41,11 +41,11 @@ int main(int argc, const char* argv[]) {
                 pathTagList = @[];
             }
 
-            [infoList addObject:@{@"path" : path, @"tags" : pathTagList}];
+            [pathMetadataList addObject:@{@"path" : path, @"tags" : pathTagList}];
         }
 
         // Output
-        NSData* data = [NSJSONSerialization dataWithJSONObject:@{@"data" : infoList}
+        NSData* data = [NSJSONSerialization dataWithJSONObject:@{@"data" : pathMetadataList}
                                                        options:NSJSONWritingPrettyPrinted
                                                          error:nil];
         NSString* result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
