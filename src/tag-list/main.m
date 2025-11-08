@@ -8,7 +8,7 @@ int main(int argc, const char* argv[]) {
 
     @autoreleasepool {
         // Collect path set
-        NSFileManager* fileManager = [NSFileManager new];
+        NSFileManager* fileManager = [NSFileManager defaultManager];
         NSMutableSet* pathSet = [NSMutableSet set];
 
         for (int i = 1; i < argc; i++) {
@@ -26,7 +26,7 @@ int main(int argc, const char* argv[]) {
         }
 
         // Collect path tags
-        NSMutableArray* pathMetadataList = [NSMutableArray new];
+        NSMutableArray* pathMetadataList = [NSMutableArray array];
 
         NSEnumerator* pathSetEnumerator = [pathSet objectEnumerator];
         NSString* path;
@@ -49,7 +49,7 @@ int main(int argc, const char* argv[]) {
                                                        options:NSJSONWritingPrettyPrinted
                                                          error:nil];
         NSString* result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        printf("%s\n", [result cStringUsingEncoding:NSUTF8StringEncoding]);
+        printf("%s\n", result.UTF8String);
     }
 
     return 0;
