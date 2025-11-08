@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - GitHub workflow to build unversal binary and create release
+- tags obtain & serialization error handle
 
 ### Changed
 

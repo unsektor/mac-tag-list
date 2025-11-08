@@ -30,24 +30,37 @@ int main(int argc, const char* argv[]) {
 
         NSEnumerator* pathSetEnumerator = [pathSet objectEnumerator];
         NSString* path;
+        NSError* error;
 
         while ((path = [pathSetEnumerator nextObject])) {
             NSURL* url = [NSURL fileURLWithPath:path];
             NSArray* pathTagList;
 
-            [url getResourceValue:&pathTagList forKey:NSURLTagNamesKey error:nil];
+            BOOL success = [url getResourceValue:&pathTagList forKey:NSURLTagNamesKey error:&error];
+            if (NO == success) {
+                fprintf(stderr, "Error: unable to obtain tags for path: %s (%ld)\n",
+                        [[error localizedDescription] UTF8String], (long)[error code]);
+                error = nil;
+            }
 
-            if (nil == pathTagList) {
+            if (pathTagList == nil) {
                 pathTagList = @[];
             }
 
-            [pathMetadataList addObject:@{@"path" : path, @"tags" : pathTagList}];
+            NSDictionary* pathMetadata = @{@"path" : path, @"tags" : pathTagList};
+            [pathMetadataList addObject:pathMetadata];
         }
 
         // Output
         NSData* data = [NSJSONSerialization dataWithJSONObject:@{@"data" : pathMetadataList}
                                                        options:NSJSONWritingPrettyPrinted
-                                                         error:nil];
+                                                         error:&error];
+
+        if (error != nil) {
+            fprintf(stderr, "Error: unable to serialize data: %s.\n", error);
+            return 2;
+        }
+
         NSString* result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         printf("%s\n", result.UTF8String);
     }
