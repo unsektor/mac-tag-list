@@ -1,0 +1,178 @@
+name: Build macOS universal binary & create release
+
+on:
+    push:
+        tags:
+            - '*.*.*'
+    release:
+        types: [published]
+
+env:
+    PROJECT_NAME: "tag-list"
+    VERSION: ${{ github.ref_name }}
+
+jobs:
+    build:
+        runs-on: ${{ matrix.runner }}
+        strategy:
+            matrix:
+                include:
+                    - runner: macos-14
+                      macos_version: "14"
+                      deployment_target: "14.0"
+                      identifier: "macos14"
+
+                    - runner: macos-14
+                      macos_version: "13"
+                      deployment_target: "13.0"
+                      identifier: "macos13"
+
+                    - runner: macos-14
+                      macos_version: "12"
+                      deployment_target: "12.0"
+                      identifier: "macos12"
+
+                    - runner: macos-14
+                      macos_version: "11"
+                      deployment_target: "11.0"
+                      identifier: "macos11"
+
+                    - runner: macos-14
+                      macos_version: "10.15"
+                      deployment_target: "10.15"
+                      identifier: "macos1015"
+
+                    - runner: macos-14
+                      macos_version: "10.14"
+                      deployment_target: "10.14"
+                      identifier: "macos1014"
+
+                    - runner: macos-14
+                      macos_version: "10.13"
+                      deployment_target: "10.13"
+                      identifier: "macos1013"
+
+                    - runner: macos-14
+                      macos_version: "10.12"
+                      deployment_target: "10.12"
+                      identifier: "macos1012"
+
+                    - runner: macos-14
+                      macos_version: "10.11"
+                      deployment_target: "10.11"
+                      identifier: "osx1011"
+
+                    - runner: macos-14
+                      macos_version: "10.10"
+                      deployment_target: "10.10"
+                      identifier: "osx1010"
+
+                    - runner: macos-14
+                      macos_version: "10.9"
+                      deployment_target: "10.9"
+                      identifier: "osx1009"
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Xcode
+              run: |
+                  sudo xcode-select -switch /Applications/Xcode_15.2.app/Contents/Developer
+                  xcodebuild -version
+
+            - name: Compile Objective-C
+              run: |
+                  clang -framework Foundation \
+                    -mmacosx-version-min=${{ matrix.deployment_target }} \
+                    -arch x86_64 -arch arm64 \
+                    -o ${{ env.PROJECT_NAME }}_${{ matrix.identifier }} \
+                    src/tag-list/main.m
+
+            - name: Get binary info
+              run: |
+                  file ${{ env.PROJECT_NAME }}_${{ matrix.identifier }}
+                  lipo -info ${{ env.PROJECT_NAME }}_${{ matrix.identifier }}
+                  otool -l ${{ env.PROJECT_NAME }}_${{ matrix.identifier }} > /tmp/.capture 
+                  cat /tmp/.capture | grep LC_VERSION_MIN_MACOSX -A3 || true;
+                  cat /tmp/.capture | grep LC_BUILD_VERSION -A4 || true;
+
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ env.PROJECT_NAME }}-${{ matrix.identifier }}-${{ env.VERSION }}
+                  path: ${{ env.PROJECT_NAME }}_${{ matrix.identifier }}
+                  retention-days: 30
+
+    create-universal-release:
+        runs-on: macos-latest
+        needs: build
+        if: startsWith(github.ref, 'refs/tags/')
+
+        steps:
+            - name: Download all artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: artifacts
+
+            - name: List artifacts
+              run: find artifacts -type f
+
+            - name: Create release bundle
+              run: |
+                  mkdir -p release/${{ env.VERSION }}
+                  find artifacts -name "${{ env.PROJECT_NAME }}_*" -type f -exec cp {} release/${{ env.VERSION }} \;
+
+                  cat << EOF > release/${{ env.VERSION }}/readme.md
+                  # ${{ env.PROJECT_NAME }} ${{ env.VERSION }}
+
+                  ## Supported macOS versions
+
+                  | Binary             | macOS Version   | Architecture    |
+                  |--------------------|-----------------|-----------------|
+                  | ${PROJECT_NAME}_macos14   | 14.0+           | x86_64, arm64   |
+                  | ${PROJECT_NAME}_macos13   | 13.0+           | x86_64, arm64   |
+                  | ${PROJECT_NAME}_macos12   | 12.0+           | x86_64, arm64   |
+                  | ${PROJECT_NAME}_macos11   | 11.0+           | x86_64, arm64   |
+                  | ${PROJECT_NAME}_macos1015 | 10.15+          | x86_64, arm64   |
+                  | ${PROJECT_NAME}_macos1014 | 10.14+          | x86_64, arm64   |
+                  | ${PROJECT_NAME}_macos1013 | 10.13+          | x86_64, arm64   |
+                  | ${PROJECT_NAME}_macos1012 | 10.12+          | x86_64, arm64   |
+                  | ${PROJECT_NAME}_osx1011   | 10.11+          | x86_64, arm64   |
+                  | ${PROJECT_NAME}_osx1010   | 10.10+          | x86_64, arm64   |
+                  | ${PROJECT_NAME}_osx1009   | 10.9+           | x86_64, arm64   |
+                  EOF
+
+                  cat << 'EOF' >> release/${{ env.VERSION }}/readme.md
+
+                  ## Installation
+
+                  Copy the appropriate binary for your macOS version to your desired location, for example:
+
+                  ```sh
+                  cp tag-list_macos14 /usr/local/bin/tag-list
+                  ```
+                  EOF
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: release/${{ env.VERSION }}/*
+                  body: |
+                      Pre-compiled binaries for ${{ env.PROJECT_NAME }} ${{ env.VERSION }}
+
+                      ### Supported macOS Versions
+
+                      - macOS 14.0 (Sonoma)
+                      - macOS 13.0 (Ventura)
+                      - macOS 12.0 (Monterey)
+                      - macOS 11.0 (Big Sur)
+                      - macOS 10.15 (Catalina)
+                      - macOS 10.14 (Mojave)
+                      - macOS 10.13 (High Sierra)
+                      - macOS 10.12 (Sierra) 
+                      - OS X 10.11 (El Capitan)
+                      - OS X 10.10 (Yosemite)
+                      - OS X 10.9 (Maverics)
+
+                      Each binary is compiled with the minimum deployment target for its respective macOS version.

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-11-08
+### Added
+
+- GitHub workflow to build unversal binary and create release
+- tags obtain & serialization error handle
+
+### Changed
+
+- code micro-optimizations performed
+- continue program if file is not exists (like `cp`)
+
 ## [0.1.1] - 2025-11-06
 ### Added
 
@@ -18,5 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Initial commit
 
+[0.2.0]: https://github.com/unsektor/mac-tag-list/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/unsektor/mac-tag-list/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/unsektor/mac-tag-list/releases/tag/0.1.0

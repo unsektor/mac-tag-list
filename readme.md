@@ -49,5 +49,14 @@ Useful usage could be case with passing result of `find`
 find ~/Documents/ -type f -iname '*.txt' -print0 | xargs -0 tag-list
 ```
 
+## Contribution
+
+codestyle:
+
+```sh
+# brew install clang-format
+clang-format src/tag-list/main.m -i --style="{BasedOnStyle: Google, IndentWidth: 4}"
+```
+
 ## [Changelog](changelog.md)
 ## [License (MIT)](license.md)
